@@ -48,5 +48,5 @@ def main_menu_kb(lang: str) -> InlineKeyboardMarkup:
     b.button(text=t("m_premium", lang), callback_data="menu:premium")
     b.button(text=t("m_help", lang), callback_data="menu:help")
     b.button(text=t("m_profile", lang), callback_data="menu:profile")
-    b.adjust(2, 2, 2, (1)
+        b.adjust(1)
     return b.as_markup()

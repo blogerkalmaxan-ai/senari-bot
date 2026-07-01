@@ -18,7 +18,6 @@ def _lang(u: User | None) -> str:
     return u.lang if u else "uz"
 
 
-# ---- Referral: /start ref_<tg_id> ----
 @router.message(CommandStart(deep_link=True))
 async def start_with_ref(
     message: Message, command: CommandObject, session, db_user: User | None
@@ -41,7 +40,6 @@ async def start_with_ref(
         await message.answer(t("choose_lang"), reply_markup=lang_kb())
 
 
-# ---- Premium menu ----
 @router.callback_query(F.data == "menu:premium")
 async def premium_menu(cb: CallbackQuery, db_user: User | None) -> None:
     lang = _lang(db_user)
@@ -85,7 +83,6 @@ async def buy_premium(cb: CallbackQuery, bot: Bot) -> None:
     await cb.answer()
 
 
-# ---- Referral info ----
 @router.callback_query(F.data == "menu:profile")
 async def profile(cb: CallbackQuery, bot: Bot, db_user: User | None) -> None:
     lang = _lang(db_user)
@@ -100,6 +97,33 @@ async def profile(cb: CallbackQuery, bot: Bot, db_user: User | None) -> None:
         f"🔗 Referal havolangiz:\n{ref_link}"
     )
     b = InlineKeyboardBuilder()
+    b.button(text="🌐 Til / Язык / Language", callback_data="setlang")
     b.button(text="⬅️ Orqaga", callback_data="menu:home")
+    b.adjust(1)
     await cb.message.edit_text(text, reply_markup=b.as_markup())
     await cb.answer()
+
+
+@router.callback_query(F.data == "setlang")
+async def choose_lang(cb: CallbackQuery) -> None:
+    from app.keyboards.common import lang_kb
+
+    await cb.message.edit_text(
+        "Tilni tanlang / Выберите язык / Choose a language:",
+        reply_markup=lang_kb(),
+    )
+    await cb.answer()
+
+
+@router.callback_query(F.data.startswith("lang:"))
+async def apply_lang(cb: CallbackQuery, users, db_user) -> None:
+    lang = cb.data.split(":")[1]
+    if db_user:
+        await users.update(db_user, lang=lang)
+    from app.keyboards.common import main_menu_kb
+    from app.locales import t
+
+    await cb.message.edit_text(
+        t("main_menu", lang), reply_markup=main_menu_kb(lang)
+    )
+    await cb.answer("✅")

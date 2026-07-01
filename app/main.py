@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import os
 
 from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
@@ -28,7 +29,11 @@ async def init_db() -> None:
 
 async def main() -> None:
     await init_db()
-    redis = Redis(host=settings.redis_host, port=settings.redis_port)
+    redis_url = os.environ.get("REDIS_URL")
+    if redis_url:
+        redis = Redis.from_url(redis_url)
+    else:
+        redis = Redis(host=settings.redis_host, port=settings.redis_port)
     storage = RedisStorage(redis=redis)
     bot = Bot(token=settings.bot_token, default=DefaultBotProperties(parse_mode="HTML"))
     dp = Dispatcher(storage=storage)

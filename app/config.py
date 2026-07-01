@@ -18,15 +18,16 @@ class Settings(BaseSettings):
 
     files_dir: str = "/app/files"
 
-    # Click
+    card_number: str = ""
+    card_holder: str = ""
+
     click_service_id: str = ""
     click_merchant_id: str = ""
     click_secret_key: str = ""
 
-    # Web (webhook server)
     web_host: str = "0.0.0.0"
     web_port: int = 8000
-    public_url: str = ""  # https://yourdomain.uz
+    public_url: str = ""
 
     @property
     def database_url(self) -> str:

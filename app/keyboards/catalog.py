@@ -51,7 +51,8 @@ def scenario_list_kb(
 
 def scenario_card_kb(scenario: Scenario, lang: str) -> InlineKeyboardMarkup:
     b = InlineKeyboardBuilder()
-    b.button(text=t("buy_btn", lang), callback_data=f"buy:{scenario.id}")
+    b.button(text="⭐ Stars bilan", callback_data=f"buy:{scenario.id}")
+    b.button(text="💳 Karta orqali", callback_data=f"card:{scenario.id}")
     b.button(
         text=t("back_btn", lang),
         callback_data=f"cat:{scenario.category_id}:0",

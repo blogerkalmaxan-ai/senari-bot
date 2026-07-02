@@ -20,6 +20,7 @@ class Settings(BaseSettings):
 
     card_number: str = ""
     card_holder: str = ""
+    support_username: str = ""
 
     click_service_id: str = ""
     click_merchant_id: str = ""

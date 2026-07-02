@@ -8,7 +8,7 @@ from aiogram.fsm.storage.redis import RedisStorage
 from redis.asyncio import Redis
 
 from app.config import settings
-from app.handlers import admin, card_payment, catalog, payment, premium, purchases, start
+from app.handlers import admin, card_payment, catalog, help, payment, premium, purchases, start
 from app.middlewares.db import DbSessionMiddleware
 from app.models.base import Base, engine
 import app.models  # noqa: F401
@@ -44,6 +44,7 @@ async def main() -> None:
     dp.include_router(catalog.router)
     dp.include_router(payment.router)
     dp.include_router(card_payment.router)
+    dp.include_router(help.router)
     dp.include_router(purchases.router)
     logging.info("Senari.uz bot ishga tushdi")
     await bot.delete_webhook(drop_pending_updates=True)

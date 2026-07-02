@@ -84,15 +84,24 @@ async def buy_premium(cb: CallbackQuery, bot: Bot) -> None:
 
 
 @router.callback_query(F.data == "menu:profile")
-async def profile(cb: CallbackQuery, bot: Bot, db_user: User | None) -> None:
+async def profile(cb: CallbackQuery, bot: Bot, session, db_user: User | None) -> None:
     lang = _lang(db_user)
     me = await bot.get_me()
     ref_link = f"https://t.me/{me.username}?start=ref_{cb.from_user.id}"
     prem = "✅" if (db_user and db_user.is_premium) else "❌"
+
+    purchase_count = 0
+    if db_user:
+        from app.repositories.purchase import PurchaseRepository
+
+        items = await PurchaseRepository(session).list_for_user(db_user.id)
+        purchase_count = len(items)
+
     text = (
         "👤 <b>Profil</b>\n\n"
         f"Ism: {db_user.name if db_user else '-'}\n"
         f"Premium: {prem}\n"
+        f"🛍 Xaridlar: {purchase_count} ta\n"
         f"👥 Taklif qilganlar: {db_user.referral_count if db_user else 0}\n\n"
         f"🔗 Referal havolangiz:\n{ref_link}"
     )

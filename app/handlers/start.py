@@ -65,7 +65,7 @@ async def get_phone(message: Message, state: FSMContext) -> None:
 
 @router.message(Register.region, F.text)
 async def get_region(
-    message: Message, state: FSMContext, users: UserRepository, db_user: User
+    message: Message, state: FSMContext, session, users: UserRepository, db_user: User
 ) -> None:
     data = await state.get_data()
     lang = data.get("lang", "uz")
@@ -78,5 +78,17 @@ async def get_region(
         lang=lang,
     )
     await message.answer(t("registered", lang, name=data.get("name", "")))
+
+    pending = data.get("pending_scenario")
+    if pending:
+        try:
+            from app.handlers.premium import _open_scenario_card
+
+            await _open_scenario_card(message, session, int(pending), lang)
+            await state.clear()
+            return
+        except Exception:
+            pass
+
     await show_main_menu(message, lang)
     await state.clear()

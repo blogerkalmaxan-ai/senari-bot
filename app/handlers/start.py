@@ -1,9 +1,9 @@
 from aiogram import F, Router
 from aiogram.filters import CommandStart
 from aiogram.fsm.context import FSMContext
-from aiogram.types import CallbackQuery, Message, ReplyKeyboardRemove
+from aiogram.types import CallbackQuery, Message
 
-from app.keyboards.common import lang_kb, main_menu_kb, phone_kb, skip_kb
+from app.keyboards.common import lang_kb, phone_kb, skip_kb
 from app.locales import t
 from app.models import User
 from app.repositories.user import UserRepository
@@ -13,8 +13,9 @@ router = Router()
 
 
 async def show_main_menu(message: Message, lang: str) -> None:
-    await message.answer(t("main_menu", lang), reply_markup=ReplyKeyboardRemove())
-    await message.answer("👇", reply_markup=main_menu_kb(lang))
+    from app.keyboards.common import reply_menu_kb
+
+    await message.answer(t("main_menu", lang), reply_markup=reply_menu_kb(lang))
 
 
 @router.message(CommandStart())

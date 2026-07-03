@@ -115,16 +115,19 @@ async def profile(cb: CallbackQuery, bot: Bot, session, db_user: User | None) ->
 
 @router.callback_query(F.data == "setlang")
 async def choose_lang(cb: CallbackQuery) -> None:
-    from app.keyboards.common import lang_kb
-
+    b = InlineKeyboardBuilder()
+    b.button(text="🇺🇿 O'zbek", callback_data="chlang:uz")
+    b.button(text="🇷🇺 Русский", callback_data="chlang:ru")
+    b.button(text="🇬🇧 English", callback_data="chlang:en")
+    b.adjust(3)
     await cb.message.edit_text(
         "Tilni tanlang / Выберите язык / Choose a language:",
-        reply_markup=lang_kb(),
+        reply_markup=b.as_markup(),
     )
     await cb.answer()
 
 
-@router.callback_query(F.data.startswith("lang:"))
+@router.callback_query(F.data.startswith("chlang:"))
 async def apply_lang(cb: CallbackQuery, users, db_user) -> None:
     lang = cb.data.split(":")[1]
     if db_user:

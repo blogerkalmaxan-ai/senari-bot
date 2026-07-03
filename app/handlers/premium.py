@@ -20,9 +20,10 @@ def _lang(u: User | None) -> str:
 
 @router.message(CommandStart(deep_link=True))
 async def start_with_ref(
-    message: Message, command: CommandObject, session, db_user: User | None
+    message: Message, command: CommandObject, state, session, db_user: User | None
 ) -> None:
     arg = command.args or ""
+
     if arg.startswith("ref_") and db_user:
         try:
             referrer = int(arg[4:])
@@ -34,10 +35,43 @@ async def start_with_ref(
     from app.keyboards.common import lang_kb
     from app.locales import t
 
-    if db_user and db_user.phone:
-        await show_main_menu(message, _lang(db_user))
-    else:
+    if not (db_user and db_user.phone):
+        if arg.startswith("sc_"):
+            await state.update_data(pending_scenario=arg[3:])
         await message.answer(t("choose_lang"), reply_markup=lang_kb())
+        return
+
+    if arg.startswith("sc_"):
+        try:
+            sc_id = int(arg[3:])
+        except ValueError:
+            await show_main_menu(message, _lang(db_user))
+            return
+        await _open_scenario_card(message, session, sc_id, _lang(db_user))
+        return
+
+    await show_main_menu(message, _lang(db_user))
+
+
+async def _open_scenario_card(message, session, sc_id: int, lang: str) -> None:
+    from app.keyboards.catalog import cat_name, scenario_card_kb
+    from app.handlers.catalog import render_card
+    from app.repositories.catalog import CatalogRepository
+
+    repo = CatalogRepository(session)
+    s = await repo.get_scenario(sc_id)
+    if not s:
+        from app.handlers.start import show_main_menu
+
+        await show_main_menu(message, lang)
+        return
+    cat = await repo.get_category(s.category_id)
+    text = render_card(s, cat_name(cat, lang) if cat else "", lang)
+    kb = scenario_card_kb(s, lang)
+    if s.cover_file_id:
+        await message.answer_photo(s.cover_file_id, caption=text, reply_markup=kb)
+    else:
+        await message.answer(text, reply_markup=kb)
 
 
 @router.callback_query(F.data == "menu:premium")
